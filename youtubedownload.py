@@ -42,7 +42,7 @@ def showtable(URL):
             item.get("resolution", ""),
             "" if item.get("fps", "") in ["", None] else round(float(item["fps"])),
             "" if item.get("audio_channels", "") in ["", None] else item["audio_channels"],
-            "" if item.get("filesize", "") in ["", None] else f"{round(float(item["filesize"]) / 1024 /1024, 2)}MiB",
+            "" if item.get("filesize", "") in ["", None] else f"{round(float(item['filesize']) / 1024 /1024, 2)}MiB",
             item.get("tbr", ""),
             item.get("protocol", ""),
             item.get("vcodec", ""),
