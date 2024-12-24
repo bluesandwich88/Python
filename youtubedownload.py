@@ -59,7 +59,7 @@ def showtable(URL):
 
 def selfdownload():
     type = input('请选择类型, 1:视频，2:音频: ')
-    val = input(f'请输入{"视频" if type == '1' else "音频"}地址：')
+    val = input(f'请输入{"视频" if type == "1" else "音频"}地址：')
     save_path = filedialog.askdirectory(title="选择保存文件夹")
     v_quality = ''
 
