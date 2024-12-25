@@ -1,162 +1,58 @@
+#!/usr/bin/env python
+# coding=utf-8
+'''
+Author: Kevin.Ching
+Date: 2024-12-25 00:51:20
+LastEditors: KevinCheng
+LastEditTime: 2024-12-25 15:58:37
+Email: lampard_cheng@hotmail.com
+'''
 import requests
 import json
-import re
-from urllib.parse import urlparse, parse_qs
-import pandas as pd
 
-def extract_video_id(video_input):
-    """
-    提取视频ID，如果输入是视频URL，则解析并提取ID。
-    """
-    # 判断输入是否为数字（视频ID）
-    if video_input.isdigit():
-        return video_input
-    else:
-        # 解析URL，提取视频ID
-        parsed_url = urlparse(video_input)
-        query_params = parse_qs(parsed_url.query)
-        path_segments = parsed_url.path.strip('/').split('/')
-        # 检查路径中是否包含视频ID
-        if 'video' in path_segments:
-            index = path_segments.index('video')
-            if index + 1 < len(path_segments):
-                return path_segments[index + 1]
-        # 如果在查询参数中
-        elif 'aweme_id' in query_params:
-            return query_params['aweme_id'][0]
-        else:
-            # 从URL中使用正则表达式提取数字
-            video_id_match = re.search(r'/video/(\d+)', video_input)
-            if video_id_match:
-                return video_id_match.group(1)
-            else:
-                raise ValueError("无法从输入中提取视频ID，请检查输入是否正确。")
+# 代理服务器的配置信息
+proxyHost = "www.16yun.cn"
+proxyPort = "5445"
+proxyUser = "16QMSOML"
+proxyPass = "280651"
 
-def read_cookie_from_file(file_path):
-    """
-    从指定的文件路径读取Cookie字符串。
-    """
-    with open(file_path, 'r', encoding='utf-8') as f:
-        cookie = f.read().strip()
-    return cookie
+# 构建代理字典，格式为：{'协议':'http://用户名:密码@代理服务器地址:端口'}
+proxies = {
+    'http': f'http://{proxyUser}:{proxyPass}@{proxyHost}:{proxyPort}',
+    'https': f'https://{proxyUser}:{proxyPass}@{proxyHost}:{proxyPort}'
+}
 
-def get_douyin_comments(video_input, cookie):
-    """
-    获取抖音视频的所有评论信息，并导出为Excel文件。
-    """
-    video_id = extract_video_id(video_input)
+def get_video_title(video_id):
+    # 抖音API的URL，这里仅为示例，请替换为实际的API URL
+    url = f"https://api.tiktok.com/video_info?video_id={video_id}"
 
-    # 请求URL的基础部分
-    base_url = "https://www.douyin.com/aweme/v1/web/aweme/detail/"
-
-    # 请求参数
-    params = {
-        "device_platform": "webapp",
-        "aid": "6383",
-        "channel": "channel_pc_web",
-        "aweme_id": video_id,
-        "cursor": "0",  # 起始光标
-        "count": "50",  # 每页获取的评论数量，可以根据需要调整，最大值为50
-        "item_type": "0",
-        "insert_ids": "",
-        "whale_cut_token": "",
-        "cut_version": "1",
-        "pc_client_type": "1",
-        "version_code": "170400",
-        "version_name": "17.4.0",
-        "cookie_enabled": "true",
-        "screen_width": "1920",
-        "screen_height": "1080",
-        "browser_language": "zh-CN",
-        "browser_platform": "Win32",
-        "browser_name": "Chrome",
-        "browser_version": "110.0.0.0",
-        "browser_online": "true",
-        "engine_name": "Blink",
-        "engine_version": "110.0.0.0",
-        "os_name": "Windows",
-        "os_version": "10",
-        "cpu_core_num": "8",
-        "device_memory": "8",
-        "platform": "PC",
-        "downlink": "10",
-        "effective_type": "4g",
-        "round_trip_time": "50",
-    }
-
-    # 解析Cookie字符串为字典
-    cookie_dict = {}
-    for item in cookie.split(';'):
-        if '=' in item:
-            key, value = item.strip().split('=', 1)
-            cookie_dict[key.strip()] = value.strip()
-
-    # 从Cookie中获取必要参数
-    params['webid'] = cookie_dict.get('webid', '')
-    params['msToken'] = cookie_dict.get('msToken', '')
-    params['verifyFp'] = cookie_dict.get('s_v_web_id', '')
-    params['fp'] = cookie_dict.get('s_v_web_id', '')
-
-    # 设置请求头
+    # 构造请求头部，通常包括用户代理等信息
     headers = {
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'zh-CN,zh;q=0.9',
-        'referer': f'https://www.douyin.com/video/{video_id}',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',  # 可以替换为您的浏览器User-Agent
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+        'Referer': 'https://api.tiktok.com/'
     }
 
-    # 使用解析后的Cookie字典
-    cookies = cookie_dict
+    # 发送请求，使用代理
+    try:
+        response = requests.get(url, headers=headers, proxies=proxies)
+        response.raise_for_status()  # 如果请求返回了不成功的状态码，将抛出异常
+    except requests.exceptions.HTTPError as errh:
+        print(f'HTTP Error: {errh}')
+    except requests.exceptions.ConnectionError as errc:
+        print(f'Error Connecting: {errc}')
+    except requests.exceptions.Timeout as errt:
+        print(f'Timeout Error: {errt}')
+    except requests.exceptions.RequestException as err:
+        print(f'Error: {err}')
 
-    data_list = []
-    has_more = True
-    cursor = "0"
+    # 解析响应内容
+    data = response.json()
 
-    while has_more:
-        params['cursor'] = cursor
-        # 发送GET请求
-        response = requests.get(base_url, headers=headers, params=params, cookies=cookies)
+    # 提取视频标题
+    title = data.get('title', 'No Title Available')
 
-        # 检查响应状态码
-        if response.status_code == 200:
-            result_list = response.json()
-            comments = result_list.get("comments", [])
-            for comment in comments:
-                user = comment.get('user', {})
-                # 用户主页链接
-                user_profile_url = f"https://www.douyin.com/user/{user.get('sec_uid', '')}"
-                # 用户ID
-                user_id = user.get('uid', '')
-                # 用户名
-                user_name = user.get('nickname', '')
-                # 用户评论
-                user_comment = comment.get('text', '')
+    return title
 
-                data = {
-                    '用户主页': user_profile_url,
-                    '用户ID': user_id,
-                    '用户名': user_name,
-                    '用户评论': user_comment
-                }
-                data_list.append(data)
-
-            has_more = result_list.get("has_more", 0) == 1
-            cursor = result_list.get("cursor", "0")
-            print(f"已获取 {len(data_list)} 条评论...")
-        else:
-            print(f"请求失败，状态码：{response.status_code}")
-            print(f"响应内容：{response.text}")
-            break  # 发生错误，退出循环
-
-    if data_list:
-        # 将数据保存到Excel文件
-        df = pd.DataFrame(data_list)
-        df.to_excel('douyin_comments.xlsx', index=False)
-        print(f"评论已保存到 douyin_comments.xlsx 文件中，共获取 {len(data_list)} 条评论。")
-    else:
-        print("未获取到任何评论。")
-
-if __name__ == "__main__":
-    video_input = input("请输入抖音视频的URL或视频ID：")
-    cookie = read_cookie_from_file('cookie.txt')
-    get_douyin_comments(video_input, cookie)
+# 用示例视频ID调用函数
+video_id = '7220634173042740538'
+print(get_video_title(video_id))
