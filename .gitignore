@@ -26,3 +26,6 @@ Thumbs.db
 
 # 忽略package-lock.json文件（对于Node.js项目）
 package-lock.json
+
+# 忽略自定义文件夹
+/test/
