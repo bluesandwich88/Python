@@ -16,8 +16,8 @@ else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 
 # 拼接 ffmpeg 的完整路径
-ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffmpeg.exe')
-
+# ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffmpeg.exe') #打包时替换
+ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'C:/Program Files/ffmpeg/bin/ffmpeg.exe')
 
 
 # 创建Tkinter根窗口
@@ -74,21 +74,16 @@ def selfdownload():
             video_type = input('请选择视频类型, 1:顶级，2:自定义: ')
             if video_type == '1':
                 v_quality = 'bv+ba/b'
-                # os.system(f'{tool_path} -f "bv+ba/b" --merge-output-format mp4 "{val}" --output "{save_path}/%(title)s-%(resolution)s.%(ext)s"')   
             elif video_type == '2':
                 isCheck = input('是否需要看list, y:需要 n:不需要: ')
                 if isCheck == 'y':
                     showtable(val)
-                    # os.system(f'{tool_path} -f "{quality}+ba/b" --merge-output-format mp4 "{val}" --output "{save_path}/%(title)s-%(resolution)s.%(ext)s"')
-
                 v_quality = f"{input('请输入视频编号：')}+ba/b"
             else:
                 os._exit(0)
         else:
             # 音频
             v_quality = 'ba'
-            # os.system(f'{tool_path} -f "ba" -x --audio-format mp3 "{val}" --output "{save_path}/%(title)s-%(id)s.%(ext)s"')
-
         ydl_opts = {
             'format': v_quality,  # 下载最佳视频和音频流，并合并
             'merge_output_format': "mp4" if type == '1' else "mp3",  # 合并为 mp4 格式
@@ -102,8 +97,7 @@ def selfdownload():
      
 if __name__ == "__main__":
     try:
-        # yt-dlp 的下载逻辑
-        # 你的代码内容
+        # yt-dlp 执行
         selfdownload()
     except DownloadError as e:
         if "ffmpeg" in str(e):
@@ -114,8 +108,6 @@ if __name__ == "__main__":
 
 # 使用完后销毁 Tk 主窗口
 root.destroy()
-
-
 
 
 # https://www.youtube.com/watch?v=HAcoya_e0C8
