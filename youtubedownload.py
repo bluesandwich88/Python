@@ -6,6 +6,8 @@ import tkinter as tk
 from tkinter import filedialog
 from yt_dlp.utils import DownloadError
 
+system_name = os.name
+ffmpeg_location = 'C:/Program Files/ffmpeg/bin/ffmpeg.exe' if system_name == 'nt' else '/usr/local/bin/ffmpeg'
 
 # 获取运行时目录
 if getattr(sys, 'frozen', False):
@@ -17,7 +19,7 @@ else:
 
 # 拼接 ffmpeg 的完整路径
 # ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'ffmpeg.exe') #打包时替换
-ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', 'C:/Program Files/ffmpeg/bin/ffmpeg.exe')
+ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'bin', ffmpeg_location)
 
 
 # 创建Tkinter根窗口
